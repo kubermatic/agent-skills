@@ -82,7 +82,3 @@ Just ask Claude what you need:
 2. Add or modify skills under `skills/`
 3. Each skill needs a `SKILL.md` with YAML frontmatter and instructions
 4. Open a PR
-
-## License
-
-Apache 2.0
