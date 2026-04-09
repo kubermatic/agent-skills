@@ -39,19 +39,13 @@ The platform is built on kcp, but the user doesn't need to know that. Here's how
 
 ### Browse available services
 
+Services in KDP are published at the **root workspace**, not in the user's current environment. Always check both places:
+
 ```bash
 kubectl get apiexports
 ```
 
-The output has columns like NAME and AGE. Present these as service names to the user. If the user wants to know what a service provides before enabling it:
-
-```bash
-kubectl get apiexport <name> -o yaml
-```
-
-Look at `.spec.latestResourceSchemas` to see what resource types the service offers, and summarize that for the user in plain language.
-
-**Full catalog**: The user's current environment may only show locally available services. For the full catalog, check the root level too if the kcp plugin is available:
+This lists services visible from the current location. But most services live at the root level. If the kcp plugin is available, also check there:
 
 ```bash
 kubectl kcp ws root
@@ -59,18 +53,45 @@ kubectl get apiexports
 kubectl kcp ws -
 ```
 
+If the kcp plugin is not available, you can still query the root workspace directly:
+
+```bash
+kubectl get apiexports --context <root-context>
+```
+
+Present the combined results as the service catalog. If the user wants details about a specific service:
+
+```bash
+kubectl get apiexport <name> -o yaml
+```
+
+Look at `.spec.latestResourceSchemas` to see what resource types the service offers, and summarize that for the user in plain language.
+
 ### Enable a service
 
 This is a multi-step operation — do it all at once, don't make the user drive each step.
 
-1. Find the service in the catalog and note its name and workspace path
+**Services are typically exported from the root workspace.** When the user says "enable X", assume the service lives at `root` unless you have reason to believe otherwise. Use the root workspace path (e.g., `root`, `root:<org>`) when creating the binding.
+
+1. Find the service — check the root workspace first:
+
+```bash
+kubectl kcp ws root
+kubectl get apiexport <service-name> -o yaml
+kubectl kcp ws -
+```
+
+Note the service name. The workspace path for the binding is where you found it (usually `root` or `root:<org-name>`).
+
 2. Check what permissions it needs:
 
 ```bash
 kubectl get apiexport <service-name> -o jsonpath='{.spec.permissionClaims}'
 ```
 
-3. Create the binding with only the permissions the service actually requests:
+(Run this from the workspace where the APIExport lives, i.e., root.)
+
+3. Create the binding **in the user's workspace** with the root path and only the permissions the service requests:
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -82,7 +103,7 @@ spec:
   reference:
     export:
       name: <service-name>
-      path: <workspace-path>
+      path: root
   permissionClaims:
     - all: true
       resources: <whatever-the-service-needs>
@@ -101,7 +122,7 @@ Tell the user: "Done, I've enabled <service name>. You can now create <resource 
 If the kcp plugin is installed, you can simplify step 3:
 
 ```bash
-kubectl kcp bind apiexport <workspace-path>:<service-name>
+kubectl kcp bind apiexport root:<service-name>
 ```
 
 ### Create a resource
