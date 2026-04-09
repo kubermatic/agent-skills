@@ -98,7 +98,7 @@ kubectl explain database.spec --api-version=databases.example.corp/v1
 3. Apply it
 
 ```bash
-cat <<EOF | kubectl apply -f -
+kubectl apply -f - <<'EOF'
 apiVersion: databases.example.corp/v1
 kind: Database
 metadata:
@@ -126,10 +126,14 @@ kubectl delete <kind> <name>                # remove
 Services often create Secrets or ConfigMaps alongside the main resource. Check annotations:
 
 ```bash
-kubectl get <kind> <name> -o jsonpath='{.metadata.annotations}' | python3 -m json.tool
+kubectl get <kind> <name> -o jsonpath='{.metadata.annotations}'
 ```
 
-Look for `related-resources.kdp.k8c.io/<name>` — these contain the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc).
+Look for annotations starting with `related-resources.kdp.k8c.io/` — these contain JSON with the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc). Fetch those with:
+
+```bash
+kubectl get secret <related-name> -o yaml
+```
 
 ## Navigate workspaces (needs kcp plugin)
 

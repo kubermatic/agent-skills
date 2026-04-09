@@ -30,6 +30,8 @@ cp -r skills/kdp-kubectl .claude/skills/
 # global (all projects)
 mkdir -p ~/.claude/skills/
 cp -r skills/kdp-mcp ~/.claude/skills/
+# or
+cp -r skills/kdp-kubectl ~/.claude/skills/
 ```
 
 ## Setup
