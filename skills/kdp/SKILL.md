@@ -125,6 +125,13 @@ If the kcp plugin is installed, you can simplify step 3:
 kubectl kcp bind apiexport root:<service-name>
 ```
 
+### Workspace types
+
+There are two workspace types:
+
+- kdp-organization: for organizations
+- kdp-project: for individual projects inside of an organization
+
 ### Create a resource
 
 1. Check the schema — always do this, don't guess:
@@ -146,6 +153,8 @@ spec:
   ...
 EOF
 ```
+
+If you create a resource that corresponds to a service/apiresourceschema and is written with crossplane please make sure to set the `spec.writeConnectionSecretToRef.name` otherwise this will cause issues.
 
 3. Confirm:
 
