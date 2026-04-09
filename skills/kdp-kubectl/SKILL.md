@@ -49,12 +49,12 @@ spec:
     export:
       name: <service-name>
       path: <workspace-path>
+  # permissionClaims should match what the APIExport actually requests.
+  # Check with: kubectl get apiexport <service-name> -o jsonpath='{.spec.permissionClaims}'
+  # Then accept only what's needed, for example:
   permissionClaims:
     - all: true
       resources: secrets
-      state: Accepted
-    - all: true
-      resources: configmaps
       state: Accepted
 ```
 
@@ -131,10 +131,16 @@ Services often create Secrets or ConfigMaps alongside the main resource. Check a
 kubectl get <kind> <name> -o jsonpath='{.metadata.annotations}'
 ```
 
-Look for annotations starting with `related-resources.kdp.k8c.io/` — these contain JSON with the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc). To find the secret without printing its values:
+Look for annotations starting with `related-resources.kdp.k8c.io/` — these contain JSON with the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc). To list the keys in a secret without printing values:
 
 ```bash
-kubectl get secret <related-name> -o jsonpath='{.data}' --show-managed-fields=false
+kubectl get secret <related-name> -o jsonpath='{range .data}{@.key}{"\n"}{end}'
+```
+
+If the user needs a specific key, extract just that one:
+
+```bash
+kubectl get secret <related-name> -o jsonpath='{.data.<key-name>}'
 ```
 
 **Don't dump full secret contents into the conversation.** Tell the user which secret exists and what keys it contains. If they need a specific value, extract just that key and warn them it's sensitive.
