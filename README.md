@@ -4,6 +4,12 @@
 
 ## Skills
 
+### kdp
+
+For platform users who just want to get things done. Uses kubectl under the hood but hides all the internal terminology — no mention of APIBindings, APIExports, kcp, or workspaces. Claude handles the plumbing and talks to you in plain language.
+
+**Requires:** `kubectl` pointing at a KDP workspace.
+
 ### kdp-mcp
 
 Uses the [mcp-k8s-go](https://github.com/kubermatic-labs/mcp-k8s-go) MCP server together with a Kubernetes MCP server. Claude calls the MCP tools directly — no shell commands needed.
@@ -12,7 +18,7 @@ Uses the [mcp-k8s-go](https://github.com/kubermatic-labs/mcp-k8s-go) MCP server 
 
 ### kdp-kubectl
 
-Uses plain `kubectl` commands. Same workflows, no MCP servers needed.
+For service providers and platform engineers who want to see the internals. Same kubectl workflows as `kdp` but uses the actual KCP terminology (APIBindings, APIExports, etc.).
 
 **Requires:** `kubectl` pointing at a KDP workspace.
 
@@ -23,18 +29,22 @@ Copy whichever skill you need into your Claude skills directory:
 ```bash
 # project-level (just this repo)
 mkdir -p .claude/skills/
-cp -r skills/kdp-mcp .claude/skills/
-# or
-cp -r skills/kdp-kubectl .claude/skills/
+cp -r skills/kdp .claude/skills/
 
 # global (all projects)
 mkdir -p ~/.claude/skills/
-cp -r skills/kdp-mcp ~/.claude/skills/
-# or
-cp -r skills/kdp-kubectl ~/.claude/skills/
+cp -r skills/kdp ~/.claude/skills/
 ```
 
+Replace `kdp` with `kdp-mcp` or `kdp-kubectl` if you want one of the other variants.
+
 ## Setup
+
+### kdp / kdp-kubectl
+
+1. Point your kubeconfig at a KDP workspace
+2. Check it works: `kubectl api-resources`
+3. Optionally install the [kcp kubectl plugin](https://github.com/kcp-dev/kcp) for workspace navigation
 
 ### kdp-mcp
 
@@ -57,12 +67,6 @@ cp -r skills/kdp-kubectl ~/.claude/skills/
   }
 }
 ```
-
-### kdp-kubectl
-
-1. Point your kubeconfig at a KDP workspace
-2. Check it works: `kubectl api-resources`
-3. Optionally install the [kcp kubectl plugin](https://github.com/kcp-dev/kcp) for workspace navigation
 
 ## Usage
 
