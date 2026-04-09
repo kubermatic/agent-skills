@@ -84,7 +84,7 @@ KDP has a platform layer and a resource layer. Pick the right tools:
 **Check status and get credentials:**
 1. `kubectl_get` or `kubectl_describe` the resource
 2. Look for `related-resources.kdp.k8c.io/*` annotations — these point to Secrets or ConfigMaps with connection info
-3. Get those related resources to find credentials
+3. Tell the user which secret/configmap exists and what keys it contains. **Don't dump secret values into the conversation** — if the user needs a specific value, extract just that key and warn them it's sensitive.
 
 ## Rules
 

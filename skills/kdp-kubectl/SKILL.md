@@ -32,8 +32,10 @@ kubectl get apiexport <service-name> -o yaml
 With the kcp kubectl plugin (if installed):
 
 ```bash
-kubectl kcp bind apiexport root:my-org:<service-name>
+kubectl kcp bind apiexport <workspace-path>:<service-name>
 ```
+
+Replace `<workspace-path>` with the actual path to the workspace that provides the service (e.g., `root:my-org`).
 
 Without the plugin — create an APIBinding:
 
@@ -129,11 +131,13 @@ Services often create Secrets or ConfigMaps alongside the main resource. Check a
 kubectl get <kind> <name> -o jsonpath='{.metadata.annotations}'
 ```
 
-Look for annotations starting with `related-resources.kdp.k8c.io/` — these contain JSON with the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc). Fetch those with:
+Look for annotations starting with `related-resources.kdp.k8c.io/` — these contain JSON with the name, namespace, apiVersion, and kind of related resources (usually Secrets with connection strings, passwords, etc). To find the secret without printing its values:
 
 ```bash
-kubectl get secret <related-name> -o yaml
+kubectl get secret <related-name> -o jsonpath='{.data}' --show-managed-fields=false
 ```
+
+**Don't dump full secret contents into the conversation.** Tell the user which secret exists and what keys it contains. If they need a specific value, extract just that key and warn them it's sensitive.
 
 ## Navigate workspaces (needs kcp plugin)
 
