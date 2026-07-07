@@ -22,6 +22,12 @@ For service providers and platform engineers who want to see the internals. Same
 
 **Requires:** `kubectl` pointing at a KDP workspace.
 
+### kdp-blueprints
+
+For Blueprint **authors** who want to compose several KDP services into one reusable, publishable kind (e.g. a `PostgresPair` that provisions two databases, or a `WebappStack` of database + repo + app). Walks through authoring a `BlueprintDefinition` with a kro `ResourceGraphDefinition`, validating it, publishing it to the service catalog, and smoke-testing an instance. Uses real platform terminology and includes an RGD authoring reference plus a complete example.
+
+**Requires:** `kubectl` pointing at a KDP workspace with `blueprints.kdp.k8c.io` and the services you want to compose already bound.
+
 ## Installation
 
 Copy whichever skill you need into your Claude skills directory:
@@ -36,7 +42,7 @@ mkdir -p ~/.claude/skills/
 cp -r skills/kdp ~/.claude/skills/
 ```
 
-Replace `kdp` with `kdp-mcp` or `kdp-kubectl` if you want one of the other variants.
+Replace `kdp` with `kdp-mcp`, `kdp-kubectl`, or `kdp-blueprints` if you want one of the other variants.
 
 ## Setup
 

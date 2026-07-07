@@ -1,0 +1,94 @@
+# PostgresPair — a complete, commented BlueprintDefinition.
+#
+# Composes the `dbms.example.corp` service (PostgresInstance) into a single
+# synthesized `PostgresPair` kind: one short spec (name + size) provisions TWO
+# Postgres instances that share a common storage size.
+#
+# This is modeled on the real PostgresPair Blueprint running in the KDP
+# platform-dev environment (workspace root:demo:blueprint-e2e:blueprint-creator):
+# spec.name + spec.size, two PostgresInstance children named <name>-a / <name>-b.
+#
+# Prerequisites in the authoring workspace:
+#   - blueprints.kdp.k8c.io must be bound (provides BlueprintDefinition)
+#   - dbms.example.corp must be bound (provides PostgresInstance)
+#   Confirm:  kubectl api-resources | grep -E 'blueprints.kdp.k8c.io|dbms.example.corp'
+#
+# Workflow:
+#   1. kubectl apply -f postgres-pair.yaml          # published: false
+#   2. kubectl get blueprintdefinition postgres-pair -o jsonpath='{.status.phase}'   # -> Valid
+#      (if Invalid: kubectl get blueprintdefinition postgres-pair \
+#         -o jsonpath='{.status.validationErrors}' | jq .)
+#   3. set published: true, re-apply                # -> Published, status.apiExportRef set
+#   4. bind postgrespair.blueprints.kdp.k8c.io and create an instance to smoke-test
+---
+apiVersion: blueprints.kdp.k8c.io/v1alpha1
+kind: BlueprintDefinition
+metadata:
+  name: postgres-pair
+  namespace: default
+spec:
+  version: v0.1.0                 # semver; IMMUTABLE once published — bump for any change
+  displayName: Postgres Pair
+  description: Two Postgres databases sharing a common storage size
+  category: Databases
+
+  published: false                # start false; flip to true once status.phase is Valid
+  # deprecated: false             # set true to block NEW instances (existing keep running)
+
+  catalogMetadata:                # mirrored verbatim onto the generated catalog Service
+    title: Postgres Pair
+    description: Two Postgres databases sharing a common storage size
+    category: Databases
+
+  resourceGraph:                  # the kro ResourceGraphDefinition — stored verbatim
+    apiVersion: kro.run/v1alpha1
+    kind: ResourceGraphDefinition
+    metadata:
+      name: postgrespair
+    spec:
+      # --- the synthesized kind users will create -------------------------
+      # Published group is derived: postgrespair.blueprints.kdp.k8c.io/v1alpha1
+      schema:
+        apiVersion: v1alpha1
+        kind: PostgresPair
+        spec:
+          name: string | required=true description="name prefix for the two databases"
+          size: string | default="1Gi" description="storage size shared by both databases"
+        # To surface child values back onto the instance, add a `status:` block here
+        # mapping to a real child field, e.g. status.conditions/connectionDetails.
+        # (PostgresInstance exposes host/port/etc. in its connection Secret, not in
+        # status — route those via externalRef; see reference/rgd-authoring.md.)
+
+      # --- the children this Blueprint composes ---------------------------
+      # Both kinds (dbms.example.corp/PostgresInstance) must be bound here.
+      resources:
+        # PostgresInstance is Crossplane-backed: storage goes under spec.parameters,
+        # and you MUST set writeConnectionSecretToRef.name or provisioning misbehaves.
+        - id: dbA
+          # gate dependents (and overall readiness) until this DB is actually Ready
+          readyWhen:
+            - ${dbA.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
+          template:
+            apiVersion: dbms.example.corp/v1alpha1
+            kind: PostgresInstance
+            metadata:
+              name: ${schema.spec.name}-a        # e.g. pair-svc-a
+            spec:
+              parameters:
+                storageSize: ${schema.spec.size}
+              writeConnectionSecretToRef:
+                name: ${schema.spec.name}-a-conn
+
+        - id: dbB
+          readyWhen:
+            - ${dbB.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
+          template:
+            apiVersion: dbms.example.corp/v1alpha1
+            kind: PostgresInstance
+            metadata:
+              name: ${schema.spec.name}-b        # e.g. pair-svc-b
+            spec:
+              parameters:
+                storageSize: ${schema.spec.size}
+              writeConnectionSecretToRef:
+                name: ${schema.spec.name}-b-conn
