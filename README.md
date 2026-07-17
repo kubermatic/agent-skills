@@ -12,9 +12,9 @@ For platform users who just want to get things done. Uses kubectl under the hood
 
 ### kdp-mcp
 
-Uses the [mcp-k8s-go](https://github.com/kubermatic-labs/mcp-k8s-go) MCP server together with a Kubernetes MCP server. Claude calls the MCP tools directly — no shell commands needed.
+Uses the mcp-kdp (`quay.io/kubermatic/mcp-kdp:latest`) server together with a Kubernetes MCP server. Claude calls the MCP tools directly — no shell commands needed.
 
-**Requires:** `mcp-k8s-kcp` and `kubernetes` MCP servers in your `.mcp.json`.
+**Requires:** `mcp-kdp` and `kubernetes` MCP servers in your `.mcp.json`.
 
 ### kdp-kubectl
 
@@ -42,7 +42,7 @@ mkdir -p ~/.claude/skills/
 cp -r skills/kdp ~/.claude/skills/
 ```
 
-Replace `kdp` with `kdp-mcp`, `kdp-kubectl`, or `kdp-blueprints` if you want one of the other variants.
+Replace `kdp` with `mcp-kdp`, `kdp-kubectl`, or `kdp-blueprints` if you want one of the other variants.
 
 ## Setup
 
@@ -52,18 +52,22 @@ Replace `kdp` with `kdp-mcp`, `kdp-kubectl`, or `kdp-blueprints` if you want one
 2. Check it works: `kubectl api-resources`
 3. Optionally install the [kcp kubectl plugin](https://github.com/kcp-dev/kcp) for workspace navigation
 
-### kdp-mcp
+### mcp-kdp
 
-1. Build or install [mcp-k8s-go](https://github.com/kubermatic-labs/mcp-k8s-go)
+1. Make sure you have access to the kubermatic quay repository
 2. Add to your `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "mcp-k8s-kcp": {
-      "type": "stdio",
-      "command": "/path/to/mcp-k8s-go",
-      "env": { "KUBECONFIG": "/path/to/kubeconfig" }
+    "mcp-kdp": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-v", "/absolute/path/to/your/kubeconfig:/home/nonroot/.kube/config:ro",
+        "-v", "/abolsute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
+        "quay.io/kubermatic/mcp-kdp:latest"
+      ]
     },
     "kubernetes": {
       "type": "stdio",

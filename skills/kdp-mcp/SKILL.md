@@ -1,15 +1,15 @@
 ---
 name: kdp-mcp
-description: Interact with Kubermatic Developer Platform (KDP) using MCP server tools. Use this when the user wants to discover services, enable them, create or manage resources, or explore their platform environment. Requires mcp-k8s-kcp and kubernetes MCP servers.
+description: Interact with Kubermatic Developer Platform (KDP) using MCP server tools. Use this when the user wants to discover services, enable them, create or manage resources, or explore their platform environment. Requires mcp-kdp and kubernetes MCP servers.
 allowed-tools:
-  - "mcp__mcp-k8s-kcp__listKcpWorkspaceAvailableApis"
-  - "mcp__mcp-k8s-kcp__listServiceCatalog"
-  - "mcp__mcp-k8s-kcp__listServiceBindings"
-  - "mcp__mcp-k8s-kcp__getServiceCatalogEntry"
-  - "mcp__mcp-k8s-kcp__getServiceBinding"
-  - "mcp__mcp-k8s-kcp__createServiceBinding"
-  - "mcp__mcp-k8s-kcp__deleteServiceBinding"
-  - "mcp__mcp-k8s-kcp__getKCPApiSchema"
+  - "mcp__mcp-kdp__listKcpWorkspaceAvailableApis"
+  - "mcp__mcp-kdp__listServiceCatalog"
+  - "mcp__mcp-kdp__listServiceBindings"
+  - "mcp__mcp-kdp__getServiceCatalogEntry"
+  - "mcp__mcp-kdp__getServiceBinding"
+  - "mcp__mcp-kdp__createServiceBinding"
+  - "mcp__mcp-kdp__deleteServiceBinding"
+  - "mcp__mcp-kdp__getKCPApiSchema"
   - "mcp__kubernetes__kubectl_apply"
   - "mcp__kubernetes__kubectl_get"
   - "mcp__kubernetes__kubectl_describe"
@@ -29,10 +29,14 @@ This skill needs two MCP servers in `.mcp.json`:
 ```json
 {
   "mcpServers": {
-    "mcp-k8s-kcp": {
-      "type": "stdio",
-      "command": "/path/to/mcp-k8s-go",
-      "env": { "KUBECONFIG": "/path/to/kubeconfig" }
+    "mcp-kdp": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-v", "/absolute/path/to/your/kubeconfig:/home/nonroot/.kube/config:ro",
+        "-v", "/abolsute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
+        "quay.io/kubermatic/mcp-kdp:latest"
+      ]
     },
     "kubernetes": {
       "type": "stdio",
