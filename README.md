@@ -65,7 +65,7 @@ Replace `kdp` with `mcp-kdp`, `kdp-kubectl`, or `kdp-blueprints` if you want one
       "args": [
         "run", "-i", "--rm",
         "-v", "/absolute/path/to/your/kubeconfig:/home/nonroot/.kube/config:ro",
-        "-v", "/abolsute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
+        "-v", "/absolute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
         "quay.io/kubermatic/mcp-kdp:latest"
       ]
     },
@@ -77,6 +77,8 @@ Replace `kdp` with `mcp-kdp`, `kdp-kubectl`, or `kdp-blueprints` if you want one
   }
 }
 ```
+
+Your kubeconfig must be configured to authenticate with your OIDC provider (e.g. via `kubelogin` / `oidc-login`). The oidc-login cache mount lets the container reuse your existing tokens so you don't have to re-authenticate in the browser.
 
 ## Usage
 

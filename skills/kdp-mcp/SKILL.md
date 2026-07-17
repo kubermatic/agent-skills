@@ -41,7 +41,7 @@ This skill needs two MCP servers in `.mcp.json`:
       "args": [
         "run", "-i", "--rm",
         "-v", "/absolute/path/to/your/kubeconfig:/home/nonroot/.kube/config:ro",
-        "-v", "/abolsute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
+        "-v", "/absolute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
         "quay.io/kubermatic/mcp-kdp:latest"
       ]
     },
@@ -53,6 +53,8 @@ This skill needs two MCP servers in `.mcp.json`:
   }
 }
 ```
+
+Your kubeconfig must be configured to authenticate with your OIDC provider (e.g. via `kubelogin` / `oidc-login`). The oidc-login cache mount lets the container reuse your existing tokens so you don't have to re-authenticate in the browser.
 
 ## Two layers, two tool sets
 
