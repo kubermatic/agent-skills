@@ -10,6 +10,13 @@ allowed-tools:
   - "mcp__mcp-kdp__createServiceBinding"
   - "mcp__mcp-kdp__deleteServiceBinding"
   - "mcp__mcp-kdp__getKCPApiSchema"
+  - "mcp__mcp-kdp__listBlueprintDefinitions"
+  - "mcp__mcp-kdp__getBlueprintDefinition"
+  - "mcp__mcp-kdp__createBlueprintDefinition"
+  - "mcp__mcp-kdp__publishBlueprintDefinition"
+  - "mcp__mcp-kdp__listWorkspaces"
+  - "mcp__mcp-kdp__getWorkspaceInfo"
+  - "mcp__mcp-kdp__useWorkspace"
   - "mcp__kubernetes__kubectl_apply"
   - "mcp__kubernetes__kubectl_get"
   - "mcp__kubernetes__kubectl_describe"
@@ -61,6 +68,19 @@ KDP has a platform layer and a resource layer. Pick the right tools:
 - `listKcpWorkspaceAvailableApis` — list resource kinds you can create right now
 - `getKCPApiSchema` — get the schema for a resource. **Always call this before creating anything.**
 
+**`mcp-k8s-kcp` tools — for blueprint management:**
+
+- `listBlueprintDefinitions` — list all blueprint definitions, optionally filter by namespace. Shows name, version, phase, published and deprecated status.
+- `getBlueprintDefinition` — get details about a specific blueprint definition (version, phase, published status, composed resource kinds, conditions)
+- `createBlueprintDefinition` — create a new blueprint definition from a YAML or JSON manifest
+- `publishBlueprintDefinition` — publish or unpublish a blueprint definition to make it available for tenants
+
+**`mcp-k8s-kcp` tools — for workspace navigation:**
+
+- `listWorkspaces` — list child workspaces in the current workspace (name, type, phase, URL)
+- `getWorkspaceInfo` — get current workspace path and cluster host URL
+- `useWorkspace` — switch to a different workspace by path (e.g. `root:org:project`)
+
 **`kubernetes` tools — for working with actual resources:**
 
 - `kubectl_apply` — create or update a resource from a YAML manifest
@@ -84,6 +104,17 @@ KDP has a platform layer and a resource layer. Pick the right tools:
 3. Build a YAML manifest based on that schema and what the user asked for
 4. `kubectl_apply` to create it
 5. `kubectl_get` to verify it exists
+
+**Manage blueprints:**
+1. `listBlueprintDefinitions` to see existing blueprints
+2. `getBlueprintDefinition` to inspect details, composed resources, and conditions
+3. `createBlueprintDefinition` with a YAML/JSON manifest to create a new one
+4. `publishBlueprintDefinition` to make it available for tenants
+
+**Navigate workspaces:**
+1. `getWorkspaceInfo` to see where you are now
+2. `listWorkspaces` to discover child workspaces
+3. `useWorkspace` to switch to a different workspace by path
 
 **Check status and get credentials:**
 1. `kubectl_get` or `kubectl_describe` the resource
