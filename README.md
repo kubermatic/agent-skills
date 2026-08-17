@@ -12,9 +12,9 @@ For platform users who just want to get things done. Uses kubectl under the hood
 
 ### kdp-mcp
 
-Uses the mcp-kdp (`quay.io/kubermatic/mcp-kdp:latest`) server together with a Kubernetes MCP server. Claude calls the MCP tools directly — no shell commands needed.
+Uses the mcp-kdp server. Claude calls its MCP tools directly — no shell commands and no kubectl. The server covers both the platform layer (service catalog, workspaces) and the resource layer (create, read, update, delete), so no second Kubernetes MCP server is needed.
 
-**Requires:** `mcp-kdp` and `kubernetes` MCP servers in your `.mcp.json`.
+**Requires:** the MCP endpoint hosted by your platform, added to your `.mcp.json` as `kdp`. Nothing to install.
 
 ### kdp-kubectl
 
@@ -42,7 +42,7 @@ mkdir -p ~/.claude/skills/
 cp -r skills/kdp ~/.claude/skills/
 ```
 
-Replace `kdp` with `mcp-kdp`, `kdp-kubectl`, or `kdp-blueprints` if you want one of the other variants.
+Replace `kdp` with `kdp-mcp`, `kdp-kubectl`, or `kdp-blueprints` if you want one of the other variants.
 
 ## Setup
 
@@ -52,33 +52,22 @@ Replace `kdp` with `mcp-kdp`, `kdp-kubectl`, or `kdp-blueprints` if you want one
 2. Check it works: `kubectl api-resources`
 3. Optionally install the [kcp kubectl plugin](https://github.com/kcp-dev/kcp) for workspace navigation
 
-### mcp-kdp
+### kdp-mcp
 
-1. Make sure you have access to the kubermatic quay repository
-2. Add to your `.mcp.json`:
+No install and no kubeconfig. Get the URL from the dashboard under **Connect an AI agent**, then:
 
-```json
-{
-  "mcpServers": {
-    "mcp-kdp": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-v", "/absolute/path/to/your/kubeconfig:/home/nonroot/.kube/config:ro",
-        "-v", "/absolute/path/to/your/oidc-login/cache:/home/nonroot/.kube/cache/oidc-login:ro",
-        "quay.io/kubermatic/mcp-kdp:latest"
-      ]
-    },
-    "kubernetes": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["mcp-server-kubernetes"]
-    }
-  }
-}
+```bash
+claude mcp add --transport http \
+  --client-id kdp-mcp \
+  --callback-port 19876 \
+  kdp https://public.api.<your-kdp-domain>/mcp
 ```
 
-Your kubeconfig must be configured to authenticate with your OIDC provider (e.g. via `kubelogin` / `oidc-login`). The oidc-login cache mount lets the container reuse your existing tokens so you don't have to re-authenticate in the browser.
+Run `/mcp` and log in through the browser. Every call acts as you, with your permissions.
+
+Don't change the callback port — the matching redirect URI is pre-registered with the identity provider, which exact-matches it. Don't pin `oauth.scopes` either: the gateway advertises the scopes it needs, and overriding them breaks authorization.
+
+The server is stateless: every tool takes an explicit workspace path such as `root:demo`, so tell Claude which workspace you are working in.
 
 ## Usage
 
